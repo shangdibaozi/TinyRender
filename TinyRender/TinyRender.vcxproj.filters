@@ -26,5 +26,8 @@
     <ClInclude Include="TinyRender.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Geometry.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -4,9 +4,11 @@
 
 int main()
 {
-	TinyRender tinyRender;
+	int width = 800;
+	int height = 600;
+	TinyRender tinyRender(width, height);
 	WinApp app;
-	app.create("TinyRender", 800, 600);
+	app.create("TinyRender", width, height);
 	app.run(tinyRender);
 	return 0;
 }
