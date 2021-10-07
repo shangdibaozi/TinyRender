@@ -26,4 +26,6 @@ public:
 	void triangle(Vec2i t0, Vec2i t1, Vec2i t2, UINT32 color);
 
 	void renderObj();
+
+	void renderObjWithTriangle();
 };

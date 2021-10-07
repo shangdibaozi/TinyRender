@@ -5,6 +5,7 @@ UINT32 red = 0xff0000;
 UINT32 green = 0x00ff00;
 UINT32 blue = 0x0000ff;
 
+#define COLOR(r, g, b) ((int(r) << 16) | ((int)(g) << 8) | (int)(b))
 
 TinyRender::TinyRender(int width, int height)
 	: _width(width),
@@ -29,7 +30,9 @@ void TinyRender::render(UINT32** canvas)
 	triangle(t1[0], t1[1], t1[2], white);
 	triangle(t2[0], t2[1], t2[2], green);*/
 
-	renderObj();
+	//renderObj();
+
+	renderObjWithTriangle();
 }
 
 void TinyRender::drawPoint(int x, int y, UINT32 color)
@@ -129,5 +132,31 @@ void TinyRender::renderObj()
 			line(x0, y0, x1, y1, white);
 		}
 	}
+}
 
+
+void TinyRender::renderObjWithTriangle()
+{
+	Vec3f lightDir(0, 0, -1);
+	int w = _width - 1;
+	int h = _height - 1;
+	for (int i = 0; i < model->nfaces(); i++)
+	{
+		std::vector<int> face = model->face(i);
+		Vec2i screenCoords[3];
+		Vec3f worldCorrds[3];
+		for (int j = 0; j < 3; j++)
+		{
+			Vec3f v = model->vert(face[j]);
+			screenCoords[j] = Vec2i((v.x + 1.0) * w / 2, (v.y + 1.0) * h / 2);
+			worldCorrds[j] = v;
+		}
+		Vec3f n = (worldCorrds[2] - worldCorrds[0]) ^ (worldCorrds[1] - worldCorrds[0]);
+		n.normalize();
+		float intensity = n * lightDir;
+		if (intensity > 0)
+		{
+			triangle(screenCoords[0], screenCoords[1], screenCoords[2], COLOR(intensity * 255, intensity * 255, intensity * 255));
+		}
+	}
 }
