@@ -27,7 +27,7 @@ Model::Model(const char* fileName)
 			Vec3f v;
 			for (int i = 0; i < 3; i++)
 			{
-				iss >> v.raw[i];
+				iss >> v[i];
 			}
 			verts_.push_back(v);
 		}

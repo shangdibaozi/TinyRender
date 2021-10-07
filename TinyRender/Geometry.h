@@ -2,104 +2,164 @@
 
 #include <cmath>
 #include <ostream>
+#include <cassert>
+#include <iostream>
 
-template <class t>
-struct Vec2 {
-	union {
-		struct { t u, v; };
-		struct { t x, y; };
-		t raw[2];
-	};
 
-	Vec2() :
-		u(0),
-		v(0)
-	{}
-
-	Vec2(t _u, t _v) :
-		u(_u),
-		v(_v)
-	{}
-
-	inline Vec2<t> operator +(const Vec2<t>& V) const {
-		return Vec2<t>(u + V.u, v + V.v);
+template <size_t DIM, typename T>
+struct vec
+{
+private:
+	T data_[DIM];
+public:
+	vec()
+	{
+		for (size_t i = DIM; i--; data_[i] = T());
 	}
 
-	inline Vec2<t> operator -(const Vec2<t>& V) const {
-		return Vec2<t>(u - V.u, v - V.v);
+	T& operator[](const size_t i)
+	{
+		assert(i < DIM);
+		return data_[i];
 	}
 
-	inline Vec2<t> operator *(float f) const {
-		return Vec2<t>(u * f, v * f);
+	const T& operator[](const size_t i) const
+	{
+		assert(i < DIM);
+		return data_[i];
 	}
-
-	template <class>
-	friend std::ostream& operator<<(std::ostream& s, Vec2<t>& v);
 };
 
-template <class t>
-struct Vec3 {
-	union {
-		struct { t x, y, z; };
-		struct { t ivert, iuv, inorm; };
-		t raw[3];
-	};
+template <typename T> 
+struct vec<2, T> {
+	T x, y;
 
-	Vec3() :
-		x(0), y(0), z(0)
+	vec(): 
+		x(T()), 
+		y(T()) 
 	{}
-	Vec3(t _x, t _y, t _z) :
-		x(_x), y(_y), z(_z)
+	vec(T X, T Y): 
+		x(X), 
+		y(Y) 
+	{}
+	template <class U> vec<2, T>(const vec<2, U>& v);
+
+	T& operator[](const size_t i) 
+	{ 
+		assert(i < 2); 
+		return i <= 0 ? x : y; 
+	}
+	const T& operator[](const size_t i) const 
+	{ 
+		assert(i < 2); 
+		return i <= 0 ? x : y; 
+	}
+
+	
+};
+
+
+template <typename T>
+struct vec<3, T>
+{
+	T x, y, z;
+
+	vec():
+		x(T()),
+		y(T()),
+		z(T())
 	{}
 
-	inline Vec3<t> operator ^(const Vec3<t>& v) const {
-		return Vec3<t>(y * v.z - z * v.y, z * v.x - x * v.z, x * v.y - y * v.x);
+	vec(T X, T Y, T Z):
+		x(X),
+		y(Y),
+		z(Z)
+	{}
+
+	template <class U> vec<3, T>(const vec<3, U>& v);
+
+	T& operator[](const size_t i)
+	{
+		assert(i < 3);
+		return i <= 0 ? x : (i == 1 ? y : z);
 	}
 
-	inline Vec3<t> operator +(const Vec3<t>& v) const {
-		return Vec3<t>(x + v.x, y + v.y, z + v.z);
+	const T& operator[](const size_t i) const
+	{
+		assert(i < 3);
+		return i <= 0 ? x : (i == 1 ? y : z);
 	}
 
-	inline Vec3<t> operator -(const Vec3<t>& v) const {
-		return Vec3<t>(x - v.x, y - v.y, z - v.z);
-	}
-
-	inline Vec3<t> operator *(float f) const {
-		return Vec3<t>(x * f, y * f, z * f);
-	}
-
-	inline t operator *(const Vec3<t>& v) const {
-		return x * v.x + y * v.y + z * v.z;
-	}
-
-	float norm() const {
+	float norm()
+	{
 		return std::sqrt(x * x + y * y + z * z);
 	}
 
-	Vec3<t>& normalize(t L = 1) {
+	vec<3, T>& normalize(T L = 1)
+	{
 		*this = (*this) * (L / norm());
 		return *this;
 	}
-
-	template <class>
-	friend std::ostream& operator<<(std::ostream& s, Vec3<t>& v);
 };
 
-
-
-typedef Vec2<float> Vec2f;
-typedef Vec2<int> Vec2i;
-
-typedef Vec3<float> Vec3f;
-typedef Vec3<int> Vec3i;
-
-template <class t> std::ostream& operator<<(std::ostream& s, Vec2<t>& v) {
-	s << "(" << v.x << ", " << v.y << ")\n";
-	return s;
+template<size_t DIM, typename T> T operator*(const vec<DIM, T>& lhs, const vec<DIM, T>& rhs)
+{
+	T ret = T();
+	for (size_t i = DIM; i--; ret += lhs[i] * rhs[i]);
+	return ret;
 }
 
-template <class t>
-std::ostream& operator<<(std::ostream& s, Vec3<t>& v) {
-	s << "(" << v.x << ", " << v.y << ", " << v.z << ")\n";
-	return s;
+template<size_t DIM, typename T>vec<DIM, T> operator+(vec<DIM, T> lhs, const vec<DIM, T>& rhs) 
+{
+	for (size_t i = DIM; i--; lhs[i] += rhs[i]);
+	return lhs;
 }
+
+template<size_t DIM, typename T>vec<DIM, T> operator-(vec<DIM, T> lhs, const vec<DIM, T>& rhs) 
+{
+	for (size_t i = DIM; i--; lhs[i] -= rhs[i]);
+	return lhs;
+}
+
+template<size_t DIM, typename T, typename U> vec<DIM, T> operator*(vec<DIM, T> lhs, const U& rhs) 
+{
+	for (size_t i = DIM; i--; lhs[i] *= rhs);
+	return lhs;
+}
+
+template<size_t DIM, typename T, typename U> vec<DIM, T> operator/(vec<DIM, T> lhs, const U& rhs) 
+{
+	for (size_t i = DIM; i--; lhs[i] /= rhs);
+	return lhs;
+}
+
+template<size_t LEN, size_t DIM, typename T> vec<LEN, T> embed(const vec<DIM, T>& v, T fill = 1) 
+{
+	vec<LEN, T> ret;
+	for (size_t i = LEN; i--; ret[i] = (i < DIM ? v[i] : fill));
+	return ret;
+}
+
+template<size_t LEN, size_t DIM, typename T> vec<LEN, T> proj(const vec<DIM, T>& v) 
+{
+	vec<LEN, T> ret;
+	for (size_t i = LEN; i--; ret[i] = v[i]);
+	return ret;
+}
+
+template <typename T> vec<3, T> cross(vec<3, T> v1, vec<3, T> v2) {
+	return vec<3, T>(v1.y * v2.z - v1.z * v2.y, v1.z * v2.x - v1.x * v2.z, v1.x * v2.y - v1.y * v2.x);
+}
+
+template <size_t DIM, typename T> std::ostream& operator<<(std::ostream& out, vec<DIM, T>& v) {
+	for (unsigned int i = 0; i < DIM; i++) {
+		out << v[i] << " ";
+	}
+	return out;
+}
+
+
+typedef vec<2, float> Vec2f;
+typedef vec<2, int>   Vec2i;
+typedef vec<3, float> Vec3f;
+typedef vec<3, int>   Vec3i;
