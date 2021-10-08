@@ -168,6 +168,10 @@ void TinyRender::triangleZBuff(Vec3f* pts, float* zbuffer, UINT32 color)
 	}
 }
 
+
+/*
+判断点是否在三角形内
+*/
 Vec3f TinyRender::barycentric(Vec3f A, Vec3f B, Vec3f C, Vec3f P)
 {
 	Vec3f s[2];
